@@ -1,0 +1,52 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+
+    <script src="/js/signalr-client-1.0.0-alpha1-final.js"></script>
+</head>
+<body>
+    <p>
+        Nome:
+        <input type="text" id="nome" name="nome" />
+    </p>
+    <p>
+        Mensagem:
+        <input type="text" id="mensagem" name="mensagem" />
+    </p>
+    <input type="button" value="Enviar" id="enviar" name="enviar" />
+    <br />
+    <br />
+    <ul id="conversa"></ul>
+
+    <script>
+        let connection = new signalR.HubConnection('/chatfull');
+
+        connection.on('publicarMensagem', mensagem => {
+            var containerNome = $('<span/>').text(mensagem.Nome).html();
+            var containerMensagem = $('<div/>').text(mensagem.Msg).html();
+            $("#conversa").append(
+                '<li><strong>'
+                + containerNome +
+                '</strong>: '
+                + containerMensagem + '</li>');
+        }
+        );
+
+        connection.start()
+            .then(() => {
+                $("#enviar").click(function () {
+                    var nome = $("#nome").val();
+                    var mensagem = $("#mensagem").val();
+                    var msg = { Nome: nome, Msg: mensagem };
+                    connection.invoke('enviarMensagem', msg);
+                    $("#mensagem").val('');
+                });
+            }
+            );
+    </script>
+
+</body>
+</html>
